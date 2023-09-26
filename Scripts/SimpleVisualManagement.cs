@@ -74,15 +74,39 @@ namespace InteractiveSystem
         }
 
 #if UNITY_EDITOR
+        [Header("Editor Property")] public float screenDebugDis = 2;
+        public bool showDebugGUI;
+
         private void OnDrawGizmos()
         {
             if (!viewCamera) return;
             Gizmos.color = Color.green;
             Gizmos.DrawWireCube(viewCamera.transform.position, boundBoxSize);
+            // 将激活范围绘制到屏幕上 
+            var offset = (Vector2.one - activeAreaPercentage) / 2;
+            var p5 = viewCamera.ViewportToWorldPoint(new Vector3(offset.x, offset.y, screenDebugDis));
+            var p6 = viewCamera.ViewportToWorldPoint(new Vector3(1 - offset.x, offset.y, screenDebugDis));
+            var p7 = viewCamera.ViewportToWorldPoint(new Vector3(1 - offset.x, 1 - offset.y, screenDebugDis));
+            var p8 = viewCamera.ViewportToWorldPoint(new Vector3(offset.x, 1 - offset.y, screenDebugDis));
+            Gizmos.DrawLine(p5, p6);
+            Gizmos.DrawLine(p6, p7);
+            Gizmos.DrawLine(p7, p8);
+            Gizmos.DrawLine(p8, p5);
         }
 
         private void OnDrawGizmosSelected()
         {
+        }
+
+        private void OnGUI()
+        {
+            if (!showDebugGUI) return;
+            GUILayout.Label("Select Object:" + Selected);
+            // 打印所有可见对象的状态
+            foreach (var (visible, state) in VisualStates)
+            {
+                GUILayout.Label(visible.Name + ":" + state);
+            }
         }
 #endif
     }
