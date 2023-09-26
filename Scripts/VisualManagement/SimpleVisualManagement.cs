@@ -13,9 +13,8 @@ namespace InteractiveSystem
 
         private float _selectedSqrDisBuf;
 
-        public Camera viewCamera;
 
-        public RectTransform canvasTransform;
+        public Camera viewCamera;
 
         public LayerMask occlusionMask;
 
