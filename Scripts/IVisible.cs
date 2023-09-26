@@ -6,6 +6,10 @@ namespace InteractiveSystem
 {
     public interface IVisible
     {
+#if UNITY_EDITOR
+        string Name { get; }
+#endif
+
         bool Enable { get; }
 
         public void OnInvisible(VisualState oldState)

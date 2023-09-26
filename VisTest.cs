@@ -6,6 +6,7 @@ using InteractiveSystem;
 
 public class VisTest : MonoBehaviour, IVisible
 {
+    public string Name => gameObject.name;
     public bool Enable => enabled;
 
     private void OnEnable()

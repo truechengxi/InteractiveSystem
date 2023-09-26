@@ -21,6 +21,7 @@ public class TestPoint : MonoBehaviour, ISimpleVisible
     {
     }
 
+    public string Name => gameObject.name;
     public bool Enable => enabled;
     public Vector3 Position => transform.position;
 }

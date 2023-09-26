@@ -7,6 +7,12 @@ namespace InteractiveSystem
     /// </summary>
     public class SimpleVisualManagement : VisualManagementSingleSelection<ISimpleVisible>
     {
+        private static readonly Vector2 ScreenCenter = new Vector2(0.5f, 0.5f);
+
+        private Bounds _bounds;
+
+        private float _selectedSqrDisBuf;
+
         public Camera viewCamera;
 
         public RectTransform canvasTransform;
@@ -17,15 +23,7 @@ namespace InteractiveSystem
 
         public Vector3 boundBoxSize;
 
-        // TODO:等待优化
-        public Rect screenActiveArea;
-
-
-        private Bounds _bounds;
-
-        private Vector2 _screenCenter;
-
-        private float _selectedSqrDisBuf;
+        public Vector2 activeAreaPercentage;
 
         protected override void Update()
         {
@@ -33,8 +31,6 @@ namespace InteractiveSystem
             // 刷新绑定盒的参数
             _bounds.size = boundBoxSize;
             _bounds.center = transform.position;
-            // 计算屏幕中心坐标
-            _screenCenter = canvasTransform.rect.size / 2;
 
             base.Update();
         }
@@ -61,14 +57,15 @@ namespace InteractiveSystem
             if (res)
                 return VisualState.Invisible;
 
-            // TODO: 改称相对形式
             // 检测是否在可选择区域内
-            // if (!screenActiveArea.Contains(screenPos))
-            //     return VisualState.Selectable;
+            var offset = (Vector2.one - activeAreaPercentage) / 2;
+            var buf = ((Vector2)screenPos - offset) / activeAreaPercentage;
+            if (buf.x > 1 || buf.x < 0 || buf.y > 1 || buf.y < 0)
+                return VisualState.Visible;
 
             // 选择出最近的对象
-            var sqrDis = ((Vector2)screenPos - _screenCenter).sqrMagnitude;
-            if (Selected != null && sqrDis >= _selectedSqrDisBuf) return VisualState.Selectable;
+            var sqrDis = ((Vector2)screenPos - ScreenCenter).sqrMagnitude;
+            if (Selected != null && Selected != visible && sqrDis >= _selectedSqrDisBuf) return VisualState.Selectable;
             _selectedSqrDisBuf = sqrDis;
             return VisualState.Selected;
         }

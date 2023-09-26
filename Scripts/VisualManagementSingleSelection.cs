@@ -6,25 +6,31 @@ namespace InteractiveSystem
     /// 可视化管理器, 但它只允许单个可视化对象被选择
     /// </summary>
     public abstract class VisualManagementSingleSelection<T> : VisualManagement<T>
-        where T : IVisible
+        where T : class, IVisible
     {
         protected T Selected { get; private set; }
 
         protected override void Update()
         {
             DirtList.Clear();
-            foreach (var visible in VisualStates.Keys)
+            foreach (var (visible, state) in VisualStates)
             {
-                var state = VisualStates[visible];
                 var buf = visible.Enable ? UpdateVisualState(visible) : VisualState.Invisible;
                 if (buf == state) continue;
 
                 //! 易错代码
                 // 只允许一个对象被选择
-                if (buf == VisualState.Selected && Selected != null && DirtList.ContainsKey(Selected))
-                    DirtList[visible] = VisualState.Selectable;
+                if (buf == VisualState.Selected && visible != Selected)
+                {
+                    if (Selected != null && DirtList.ContainsKey(Selected))
+                        DirtList[Selected] = VisualState.Selectable;
+                    Selected = visible;
+                }
 
-                Selected = visible;
+                if (Selected == visible && buf != VisualState.Selected)
+                {
+                    Selected = null;
+                }
 
                 // 无论之前有没有被唯一选择更新, 都要更新其新计算出来的状态
                 DirtList[visible] = buf;
@@ -32,23 +38,27 @@ namespace InteractiveSystem
 
             // 统一刷新
             foreach (var (visible, target) in DirtList)
+            {
+                var oldState = VisualStates[visible];
+                VisualStates[visible] = target;
                 switch (target)
                 {
                     case VisualState.Invisible:
-                        visible.OnInvisible(VisualStates[visible]);
+                        visible.OnInvisible(oldState);
                         break;
                     case VisualState.Visible:
-                        visible.OnVisible(VisualStates[visible]);
+                        visible.OnVisible(oldState);
                         break;
                     case VisualState.Selectable:
-                        visible.OnSelectable(VisualStates[visible]);
+                        visible.OnSelectable(oldState);
                         break;
                     case VisualState.Selected:
-                        visible.OnSelected(VisualStates[visible]);
+                        visible.OnSelected(oldState);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+            }
         }
     }
 }
