@@ -18,7 +18,7 @@ namespace InteractiveSystem
 
         public LayerMask occlusionMask;
 
-        [Range(0, 1)] public float rayCastDisOffset;
+        public float rayCastDisOffset;
 
         public Vector3 boundBoxSize;
 
@@ -51,7 +51,7 @@ namespace InteractiveSystem
             var dis = Mathf.Max(0, pos.magnitude - rayCastDisOffset);
             var res = Physics.Raycast(cameraPos, dir, dis, occlusionMask);
 #if UNITY_EDITOR
-            Debug.DrawRay(cameraPos, dir, res ? Color.red : Color.green);
+            Debug.DrawRay(cameraPos, dir.normalized * Mathf.Sqrt(dis), res ? Color.red : Color.green);
 #endif
             if (res)
                 return VisualState.Invisible;
