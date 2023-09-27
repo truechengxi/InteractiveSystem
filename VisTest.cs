@@ -11,7 +11,7 @@ public class VisTest : MonoBehaviour, IVisible
 
     private void OnEnable()
     {
-        VisualManagement<VisTest>.Instance.Register(this);
+        VisualManager<VisTest>.Instance.Register(this);
     }
 
     // Start is called before the first frame update

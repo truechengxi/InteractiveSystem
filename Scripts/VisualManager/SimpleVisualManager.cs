@@ -5,7 +5,7 @@ namespace InteractiveSystem
     /// <summary>
     /// 一个简单的可视化管理器的实现
     /// </summary>
-    public class SimpleVisualManagement : VisualManagementSingleSelection<ISimpleVisible>
+    public class SimpleVisualManager : VisualManagerSingleSelection<ISimpleVisible>
     {
         private static readonly Vector2 ScreenCenter = new Vector2(0.5f, 0.5f);
 

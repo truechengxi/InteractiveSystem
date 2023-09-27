@@ -13,7 +13,7 @@ public class TestPoint : MonoBehaviour, ISimpleVisible
     // Start is called before the first frame update
     void Start()
     {
-        SimpleVisualManagement.Instance.Register(this);
+        SimpleVisualManager.Instance.Register(this);
     }
 
     // Update is called once per frame
