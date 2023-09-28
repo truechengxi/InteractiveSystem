@@ -76,8 +76,7 @@ namespace InteractiveSystem
         private void OnDrawGizmos()
         {
             if (!viewCamera) return;
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireCube(viewCamera.transform.position, boundBoxSize);
+            Gizmos.color = Color.white;
             // 将激活范围绘制到屏幕上 
             var offset = (Vector2.one - activeAreaPercentage) / 2;
             var p5 = viewCamera.ViewportToWorldPoint(new Vector3(offset.x, offset.y, screenDebugDis));
@@ -92,6 +91,9 @@ namespace InteractiveSystem
 
         private void OnDrawGizmosSelected()
         {
+            if (!viewCamera) return;
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireCube(viewCamera.transform.position, boundBoxSize);
         }
 
         private void OnGUI()

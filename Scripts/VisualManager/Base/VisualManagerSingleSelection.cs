@@ -41,6 +41,8 @@ namespace InteractiveSystem
             {
                 var oldState = VisualStates[visible];
                 VisualStates[visible] = target;
+                if(oldState == VisualState.Invisible)
+                    visible.VisibleInit();
                 switch (target)
                 {
                     case VisualState.Invisible:

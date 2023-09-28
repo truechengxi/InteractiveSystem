@@ -12,6 +12,11 @@ namespace InteractiveSystem
 
         bool Enable { get; }
 
+        public void VisibleInit()
+        {
+            
+        }
+        
         public void OnInvisible(VisualState oldState)
         {
         }

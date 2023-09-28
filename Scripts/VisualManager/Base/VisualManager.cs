@@ -77,23 +77,29 @@ namespace InteractiveSystem
 
             // 统一刷新
             foreach (var (visible, target) in DirtList)
+            {
+                var oldState = VisualStates[visible];
+                VisualStates[visible] = target;
+                if(oldState == VisualState.Invisible)
+                    visible.VisibleInit();
                 switch (target)
                 {
                     case VisualState.Invisible:
-                        visible.OnInvisible(VisualStates[visible]);
+                        visible.OnInvisible(oldState);
                         break;
                     case VisualState.Visible:
-                        visible.OnVisible(VisualStates[visible]);
+                        visible.OnVisible(oldState);
                         break;
                     case VisualState.Selectable:
-                        visible.OnSelectable(VisualStates[visible]);
+                        visible.OnSelectable(oldState);
                         break;
                     case VisualState.Selected:
-                        visible.OnSelected(VisualStates[visible]);
+                        visible.OnSelected(oldState);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+            }
         }
     }
 }
