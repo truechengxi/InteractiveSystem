@@ -4,22 +4,17 @@ using UnityEngine;
 
 namespace InteractiveSystem
 {
-    public enum VisualState
-    {
-        Invisible,
-        Visible,
-        Selectable,
-        Selected
-    }
-
     /// <summary>
     /// 可视化管理器, 它用于向所有实现了可视化接口的对象提供它们的可视化状态
     /// </summary>
-    public abstract class VisualManager<T> : Singleton<VisualManager<T>>
-        where T : IVisible
+    public abstract class VisualManager<T, TU> : Singleton<VisualManager<T, TU>>
+        where T : IVisible<TU>
+        where TU : struct, Enum
     {
-        protected Dictionary<T, VisualState> VisualStates { get; private set; }
-        protected Dictionary<T, VisualState> DirtList { get; private set; }
+        protected Dictionary<T, TU> VisualStates { get; private set; }
+        protected Dictionary<T, TU> DirtList { get; private set; }
+
+        protected readonly TU[] stateValues = (TU[])Enum.GetValues(typeof(TU));
 
         public void Register(T visible)
         {
@@ -29,7 +24,7 @@ namespace InteractiveSystem
                 return;
             }
 
-            VisualStates.Add(visible, VisualState.Invisible);
+            VisualStates.Add(visible, stateValues[0]);
         }
 
         public void Unregister(T visible)
@@ -43,63 +38,52 @@ namespace InteractiveSystem
             VisualStates.Remove(visible);
         }
 
-        public VisualState GetState(T visible)
+        public TU GetState(T visible)
         {
             if (!VisualStates.ContainsKey(visible))
-                return VisualState.Invisible;
+                return stateValues[0];
             return VisualStates[visible];
         }
 
-        protected abstract VisualState UpdateVisualState(T visible);
+        protected abstract TU UpdateVisualState(T visible);
 
         protected virtual void InitField()
         {
         }
 
+        protected void UpdateState()
+        {
+            // 统一刷新
+            foreach (var (visible, target) in DirtList)
+            {
+                var oldState = VisualStates[visible];
+                VisualStates[visible] = target;
+                if(oldState.Equals(stateValues[0]))
+                    visible.VisibleInit();
+                visible.UpdateVisibleState(oldState, target);
+            }
+            DirtList.Clear();
+        }
+        
         private void Awake()
         {
             if (CreateInstance(this)) return;
-            VisualStates = new Dictionary<T, VisualState>();
-            DirtList = new Dictionary<T, VisualState>();
+            VisualStates = new Dictionary<T, TU>();
+            DirtList = new Dictionary<T, TU>();
             InitField();
         }
 
 
         protected virtual void Update()
         {
-            DirtList.Clear();
             foreach (var (visible, state) in VisualStates)
             {
-                var buf = visible.Enable ? UpdateVisualState(visible) : VisualState.Invisible;
-                if (buf == state) continue;
+                var buf = visible.Enable ? UpdateVisualState(visible) : stateValues[0];
+                if (buf.Equals(state)) continue;
                 DirtList.Add(visible, buf);
             }
 
-            // 统一刷新
-            foreach (var (visible, target) in DirtList)
-            {
-                var oldState = VisualStates[visible];
-                VisualStates[visible] = target;
-                if(oldState == VisualState.Invisible)
-                    visible.VisibleInit();
-                switch (target)
-                {
-                    case VisualState.Invisible:
-                        visible.OnInvisible(oldState);
-                        break;
-                    case VisualState.Visible:
-                        visible.OnVisible(oldState);
-                        break;
-                    case VisualState.Selectable:
-                        visible.OnSelectable(oldState);
-                        break;
-                    case VisualState.Selected:
-                        visible.OnSelected(oldState);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+            UpdateState();
         }
         
         #if UNITY_EDITOR

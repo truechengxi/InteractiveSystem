@@ -1,10 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace InteractiveSystem
 {
-    public interface IVisible
+    public interface IVisible<T>
+    where T : Enum
     {
         bool Enable { get; }
 
@@ -12,21 +14,10 @@ namespace InteractiveSystem
         {
             
         }
-        
-        public void OnInvisible(VisualState oldState)
-        {
-        }
 
-        public void OnVisible(VisualState oldState)
+        public void UpdateVisibleState(T oldState, T targetState)
         {
-        }
-
-        public void OnSelectable(VisualState oldState)
-        {
-        }
-
-        public void OnSelected(VisualState oldState)
-        {
+            
         }
     }
 }

@@ -2,10 +2,18 @@ using UnityEngine;
 
 namespace InteractiveSystem
 {
+    public enum VisualState
+    {
+        Invisible,
+        Visible,
+        Selectable,
+        Selected
+    }
+    
     /// <summary>
     /// 一个简单的可视化管理器的实现
     /// </summary>
-    public class SimpleVisualManager : VisualManagerSingleSelection<ISimpleVisible>
+    public class SimpleVisualManager : VisualManagerSingleSelection<ISimpleVisible, VisualState>
     {
         private static readonly Vector2 ScreenCenter = new Vector2(0.5f, 0.5f);
 
@@ -40,18 +48,19 @@ namespace InteractiveSystem
             if (!_bounds.Contains(pos))
                 return VisualState.Invisible;
 
+            var cameraPos = viewCamera.transform.position;
+            
             // 检测是否在屏幕内
             var screenPos = viewCamera.WorldToViewportPoint(visible.Position);
             if (screenPos.x < 0 || screenPos.x > 1 || screenPos.y < 0 || screenPos.y > 1 || screenPos.z < 0)
                 return VisualState.Invisible;
 
             // 检测是否有遮挡物
-            var cameraPos = viewCamera.transform.position;
             var dir = pos - cameraPos;
-            var dis = Mathf.Max(0, pos.magnitude - rayCastDisOffset);
+            var dis = Mathf.Max(0, dir.magnitude - rayCastDisOffset);
             var res = Physics.Raycast(cameraPos, dir, dis, occlusionMask);
 #if UNITY_EDITOR
-            Debug.DrawRay(cameraPos, dir.normalized * Mathf.Sqrt(dis), res ? Color.red : Color.green);
+            Debug.DrawRay(cameraPos, dir.normalized * dis, res ? Color.red : Color.green);
 #endif
             if (res)
                 return VisualState.Invisible;
