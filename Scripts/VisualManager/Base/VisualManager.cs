@@ -101,5 +101,23 @@ namespace InteractiveSystem
                 }
             }
         }
+        
+        #if UNITY_EDITOR
+        [Header("Editor Property")]
+        public bool showDebugGUI;
+        
+        protected virtual void OnGUI()
+        {
+            if (!showDebugGUI) return;
+            // 打印所有可见对象的状态
+            foreach (var (visible, state) in VisualStates)
+            {
+                if (visible is Component com)
+                {
+                    GUILayout.Label(com.gameObject.name + ":" + state);
+                }
+            }
+        }
+        #endif
     }
 }

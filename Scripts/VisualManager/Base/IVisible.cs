@@ -6,8 +6,6 @@ namespace InteractiveSystem
 {
     public interface IVisible
     {
-        string Name { get; }
-
         bool Enable { get; }
 
         public void VisibleInit()

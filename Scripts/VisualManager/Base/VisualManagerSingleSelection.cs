@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace InteractiveSystem
 {
@@ -62,5 +63,14 @@ namespace InteractiveSystem
                 }
             }
         }
+        
+        #if UNITY_EDITOR
+        protected override void OnGUI()
+        {
+            if(!showDebugGUI) return;
+            GUILayout.Label("Select Object:" + Selected);
+            base.OnGUI();
+        }
+#endif
     }
 }

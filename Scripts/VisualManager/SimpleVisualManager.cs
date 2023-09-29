@@ -71,7 +71,6 @@ namespace InteractiveSystem
 
 #if UNITY_EDITOR
         [Header("Editor Property")] public float screenDebugDis = 2;
-        public bool showDebugGUI;
 
         private void OnDrawGizmos()
         {
@@ -94,17 +93,6 @@ namespace InteractiveSystem
             if (!viewCamera) return;
             Gizmos.color = Color.green;
             Gizmos.DrawWireCube(viewCamera.transform.position, boundBoxSize);
-        }
-
-        private void OnGUI()
-        {
-            if (!showDebugGUI) return;
-            GUILayout.Label("Select Object:" + Selected);
-            // 打印所有可见对象的状态
-            foreach (var (visible, state) in VisualStates)
-            {
-                GUILayout.Label(visible.Name + ":" + state);
-            }
         }
 #endif
     }
