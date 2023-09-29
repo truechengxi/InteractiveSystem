@@ -1,57 +1,57 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
-using Object = UnityEngine.Object;
 
 namespace InteractiveSystem
 {
-    public abstract class TrackIconManager<T, TU> : Singleton<TrackIconManager<T, TU>>
-    where T : Component, ITrackIcon<TU>
-    where TU : Component
+    public class TrackIconManager : Singleton<TrackIconManager>
     {
-        private IObjectPool<T> _pool;
+        private Dictionary<Component, IObjectPool<Component>> _pools;
+        private Dictionary<Component, IObjectPool<Component>> _objs;
         
-        public Transform poolParent;
-        public T prefab;
-        
+        public Transform parent;
+
         private void Awake()
         {
-            if(CreateInstance(this)) return;
-            _pool = new ObjectPool<T>(CreateFunc, ActionOnGet, ActionOnRelease, ActionOnDestroy);
+            if(CreateInstance(this))
+                return;
+            _pools = new Dictionary<Component, IObjectPool<Component>>();
+            _objs = new Dictionary<Component, IObjectPool<Component>>();
         }
 
-        protected virtual void ActionOnDestroy(T obj)
+        public T Get<T, TU>(T prefab, TU source) where T : Component, ITrackIcon<TU>
         {
-            Destroy(obj.gameObject);
+            T result = null;
+            // 若含有对象池创建器就尝试使用对象池
+            if (prefab is ITrackIconPoolCreater pc)
+            {
+                if (!_pools.ContainsKey(prefab))
+                    _pools[prefab] = pc.GetPool(parent);
+                var p = _pools[prefab];
+                result = p.Get() as T;
+                if (result != null)
+                {
+                    _objs.Add(result, p);
+                    result.Init(source);
+                }
+                return result;
+            }
+
+            result = Instantiate(prefab);
+            return result;
         }
 
-        protected virtual void ActionOnRelease(T obj)
+        public void Release(Component obj)
         {
-            obj.gameObject.SetActive(false);
-        }
-
-        protected virtual void ActionOnGet(T obj)
-        {
-            obj.gameObject.SetActive(true);
-        }
-
-        protected virtual T CreateFunc()
-        {
-            return Instantiate(prefab, poolParent);
-        }
-        
-        public T GetIcon(TU source)
-        {
-            var buf = _pool.Get();
-            buf.Init(source);
-            return buf;
-        }
-
-        public void ReleaseWithPool(T icon)
-        {
-            _pool.Release(icon);
+            if (_objs.ContainsKey(obj))
+            {
+                _objs[obj].Release(obj);
+                _objs.Remove(obj);
+                return;
+            }
+            
+            Destroy(obj);
         }
     }
 }
